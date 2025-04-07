@@ -1,6 +1,11 @@
 // import ethers
+require("@chainlink/env-enc").config()
 
 const {ethers} = require("hardhat")
+
+
+
+
 
 async function main() {
 
@@ -8,12 +13,33 @@ async function main() {
 
     console.log("contract deploying")
     
-    const fundMe = await fundMeFactory.deploy(100)
+    const fundMe = await fundMeFactory.deploy(10)
 
     await fundMe.waitForDeployment()
 
     console.log("deploy success contract address: ", fundMe.target)
+
+    console.log("NetWork ChainId is : " + hre.network.config.chainId)
+    console.log("API KEY is : " + process.env.ETHERSCAN_API_KEY)
+
+    if(hre.network.config.chainId == 11155111 && process.env.ETHERSCAN_API_KEY){
+        console.log("Waiting for block confirmations...")
+        //等待五个区块
+        await fundMe.deploymentTransaction().wait(5)
+        await verifyFundme(fundMe.target, [10]);
+    }else{
+        console.log("Skipping verification")
+    }
+
+    
 }
+
+async function verifyFundme(fundMeAddr, arg){
+    await hre.run("verify:verify", {
+        address: fundMeAddr,
+        constructorArguments: arg,
+    });
+} 
 
 main().then().catch((error) => {
     console.log(error)
