@@ -13,7 +13,7 @@ task("interact-contract", "interact with fundme contract")
 
         //第一次转账
     
-        const fundTX = await fundMe.fund({value : ethers.parseEther("0.5")})
+        const fundTX = await fundMe.fund({value : ethers.parseEther("0.05")})
         
         await fundTX.wait()
     
@@ -23,7 +23,7 @@ task("interact-contract", "interact with fundme contract")
     
     
         //第二次转账
-        const fundTXWithSecondAccount = await fundMe.connect(secondAccount).fund({value : ethers.parseEther("0.5")})
+        const fundTXWithSecondAccount = await fundMe.connect(secondAccount).fund({value : ethers.parseEther("0.05")})
         
         await fundTXWithSecondAccount.wait()
     
