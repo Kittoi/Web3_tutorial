@@ -1,37 +1,45 @@
-// function deployFunction(){
-//     console.log("this is a deploy function")
+const { network } = require("hardhat")
 
-
-// }
-
-// module.exports.default = deployFunction
-
+const {LOCK_TIME, developmentChains, networkonfig} = require("../helper-hardhat-config")
 module.exports = async({getNamedAccounts, deployments}) => {
-
-
-    // the below code is to get the first account
-    // as same as below
-    // const {firstAccount} = await getNamedAccounts()
     const firstAccount = (await getNamedAccounts()).firstAccount
-
     const {deploy} = deployments
 
-    await deploy("FundMe", {
+    let dataFeedAddr
+
+    if(developmentChains.includes(network.name)){
+        const mockV3Aggreator = await deployments.get("MockV3Aggregator");
+        dataFeedAddr = mockV3Aggreator.address
+    }else{
+        dataFeedAddr = await networkonfig[network.config.chainId].ethUsdDataFeed
+    }
+
+    console.log("dataFeedAddr is: "+ dataFeedAddr)
+
+    // 部署 FundMe 合约
+    const fundMe = await deploy("FundMe", {
         from: firstAccount,
-        args: [180],
-        log: true
+        args: [LOCK_TIME, dataFeedAddr], 
+        log: true,
+        waitConfirmations: 5
     })
-    
-    console.log(firstAccount)
-    console.log("this is a deploy function")
+
+
+
+    if(hre.network.config.chainId == 11155111 && process.env.ETHERSCAN_API_KEY){
+        console.log("Waiting for block confirmations...")
+        
+        // await new Promise(resolve => setTimeout(resolve, 30000));
+        await hre.run("verify:verify", {
+            address: fundMe.address,
+            constructorArguments: [LOCK_TIME, dataFeedAddr],
+        });
+        console.log(`FundMe deployed at: ${fundMe.address}`)
+        console.log(`Deployed by: ${firstAccount}`)
+    }else{
+        console.log("network is not sepolia, verify skiping")
+    }
+
 }
 
-/**
- * C++  ->  C   -> 底层
- * java ->  基本操作，三天速成
- * python -> 会看不会写
- * go -> 同上，但是比py多
- * html,css,vue -> 借助ai的力量完成
- * solidity -> 非常简单，学的人少，一天速成
- * js，ts -> 弱语言，很简单，但是编码坑特别多 interface{}
- */
+module.exports.tags = ["all", "FundMe"]

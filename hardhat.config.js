@@ -12,6 +12,7 @@ const PRIVATE_KEY1  = process.env.PRIVATE_KEY1
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.28",
+  defaultNetwork: "hardhat",
   networks: {
     sepolia: {
       url: SEPOLIA_URL,
