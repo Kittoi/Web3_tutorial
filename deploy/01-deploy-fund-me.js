@@ -1,6 +1,6 @@
 const { network } = require("hardhat")
 
-const {LOCK_TIME, developmentChains, networkonfig} = require("../helper-hardhat-config")
+const {LOCK_TIME, developmentChains, networkonfig, COMFIRMATIONS} = require("../helper-hardhat-config")
 module.exports = async({getNamedAccounts, deployments}) => {
     const firstAccount = (await getNamedAccounts()).firstAccount
     const {deploy} = deployments
@@ -21,7 +21,7 @@ module.exports = async({getNamedAccounts, deployments}) => {
         from: firstAccount,
         args: [LOCK_TIME, dataFeedAddr], 
         log: true,
-        waitConfirmations: 5
+        waitConfirmations: COMFIRMATIONS
     })
 
 
