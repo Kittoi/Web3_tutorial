@@ -8,6 +8,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 // 3. 在锁定期内，达到目标值，生产商可以提款
 // 4. 在锁定期内，没有达到目标值，投资人在锁定期以后退款
 
+
 contract FundMe {
     mapping(address => uint256) public fundersToAmount;
 
@@ -25,6 +26,8 @@ contract FundMe {
     address erc20Addr;
 
     bool public getFundSuccess = false;
+
+    event FundWithdrawByOwner(uint256);
 
     constructor(uint256 _lockTime, address dataFeedAddr ) {
         // sepolia testnet
@@ -72,10 +75,12 @@ contract FundMe {
         
         // call: transfer ETH with data return value of function and bool 
         bool success;
-        (success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        uint256 balance = address(this).balance;
+        (success, ) = payable(msg.sender).call{value: balance}("");
         require(success, "transfer tx failed");
         fundersToAmount[msg.sender] = 0;
         getFundSuccess = true; // flag
+        emit FundWithdrawByOwner(balance);
     }
 
     function refund() external windowClosed {

@@ -2,6 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("@chainlink/env-enc").config()
 require("./tasks")
 require("hardhat-deploy")
+require("@nomicfoundation/hardhat-ethers")
 
 const SEPOLIA_URL = process.env.SEPOLIA_URL
 const PRIVATE_KEY = process.env.PRIVATE_KEY

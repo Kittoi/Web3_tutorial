@@ -6,12 +6,15 @@ module.exports = async({getNamedAccounts, deployments}) => {
     const {deploy} = deployments
 
     let dataFeedAddr
+    let confirmations
 
     if(developmentChains.includes(network.name)){
         const mockV3Aggreator = await deployments.get("MockV3Aggregator");
         dataFeedAddr = mockV3Aggreator.address
+        confirmations = 0
     }else{
         dataFeedAddr = await networkonfig[network.config.chainId].ethUsdDataFeed
+        confirmations = COMFIRMATIONS
     }
 
     console.log("dataFeedAddr is: "+ dataFeedAddr)
@@ -21,7 +24,7 @@ module.exports = async({getNamedAccounts, deployments}) => {
         from: firstAccount,
         args: [LOCK_TIME, dataFeedAddr], 
         log: true,
-        waitConfirmations: COMFIRMATIONS
+        waitConfirmations: confirmations
     })
 
 
