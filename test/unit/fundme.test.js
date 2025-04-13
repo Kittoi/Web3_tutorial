@@ -1,8 +1,12 @@
-const { ethers, deployments, getNamedAccounts } = require("hardhat") 
+const { ethers, deployments, getNamedAccounts, network } = require("hardhat") 
 const { assert, expect } = require("chai")
 const helpers = require("@nomicfoundation/hardhat-network-helpers")
+const { developmentChains } = require("../../helper-hardhat-config")
 
-describe("test fundme contract", async function(){
+
+!developmentChains.includes(network.name)
+? describe.skip
+: describe("test fundme contract -network local", async function(){
 
     let fundMe
     let fundMeSecondAccount
@@ -11,6 +15,9 @@ describe("test fundme contract", async function(){
     let mockV3Aggregator
 
     beforeEach(async function(){
+
+        //重置网络
+        await network.provider.send("hardhat_reset")
         //fixture 用于重置测试环境
         await deployments.fixture(["all"])
         firstAccount = (await getNamedAccounts()).firstAccount
@@ -21,6 +28,12 @@ describe("test fundme contract", async function(){
         fundMe = await ethers.getContractAt("FundMe", fundMeDeployment.address)
         fundMeSecondAccount = await ethers.getContractAt("FundMe", secondAccount)
     })
+
+    afterEach(async function() {
+        await network.provider.send("hardhat_reset")
+    })
+
+
 
     it("test if owner is msg.sender", async function () {
         // const fundMeFactory = await ethers.getContractFactory("FundMe")
@@ -93,7 +106,6 @@ describe("test fundme contract", async function(){
     })
 
     it("window closed,  target reached, getFund success", async function(){
-        //make sure the target is reached
         await fundMe.fund({value: ethers.parseEther("1")})
 
         await helpers.time.increase(200)
@@ -103,6 +115,7 @@ describe("test fundme contract", async function(){
             to.emit(fundMe, "FundWithdrawByOwner")
             .withArgs(ethers.parseEther("1"))  
     })
+
 
     //refund
     //windowClosed, target not reached, funder has ballance

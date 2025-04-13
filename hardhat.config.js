@@ -14,6 +14,9 @@ const PRIVATE_KEY1  = process.env.PRIVATE_KEY1
 module.exports = {
   solidity: "0.8.28",
   defaultNetwork: "hardhat",
+  mocha:{
+    timeout: 6000000
+  },
   networks: {
     sepolia: {
       url: SEPOLIA_URL,
@@ -33,5 +36,8 @@ module.exports = {
     secondAccount: {
       default: 1 
     }
+  },
+  gasReporter: {
+    enabled: true
   }
 };

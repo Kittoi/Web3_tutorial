@@ -1,8 +1,12 @@
 const { ethers, deployments, getNamedAccounts } = require("hardhat") 
 const { assert, expect } = require("chai")
+const { developmentChains } = require("../../helper-hardhat-config")
+
 const helpers = require("@nomicfoundation/hardhat-network-helpers")
 
-describe("test fundme contract", async function(){
+developmentChains.includes(network.name)
+? describe.skip
+: describe("test fundme contract -- network sepolia", async function(){
 
     let fundMe
     let firstAccount
@@ -15,7 +19,31 @@ describe("test fundme contract", async function(){
         fundMe = await ethers.getContractAt("FundMe", fundMeDeployment.address)
     })
 
-    
+    it("fund and getFund successfully", async function(){
+        await fundMe.fund({value : ethers.parseEther("1")})
+
+        await new Promise(resolve => setTimeout(resolve, 181 * 1000))
+
+        const getFundTx = await fundMe.getFund()
+        const getFundReceipt = await getFundTx.wait()
+
+        expect(getFundReceipt)
+            .to.be.emit(fundMe, "FundWithdrawByOwner")
+            .withArgs(ethers.parseEther("0.5"))
+    })
+
+    it("fund and refund successfully", async function(){
+        await fundMe.fund({value : ethers.parseEther("0.1")})
+
+        await new Promise(resolve => setTimeout(resolve, 181 * 1000))
+
+        const refundTx = await fundMe.refund()
+        const refundReceipt = await refundTx.wait()
+
+        expect(refundReceipt)
+            .to.be.emit(fundMe, "RefundByFunder")
+            .withArgs(firstAccount, ethers.parseEther("0.1"))
+    })
 
 
 
