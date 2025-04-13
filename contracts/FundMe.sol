@@ -28,6 +28,7 @@ contract FundMe {
     bool public getFundSuccess = false;
 
     event FundWithdrawByOwner(uint256);
+    event RefundByFunder(address, uint256);
 
     constructor(uint256 _lockTime, address dataFeedAddr ) {
         // sepolia testnet
@@ -87,9 +88,11 @@ contract FundMe {
         require(convertEthToUsd(address(this).balance) < TARGET, "Target is reached");
         require(fundersToAmount[msg.sender] != 0, "there is no fund for you");
         bool success;
-        (success, ) = payable(msg.sender).call{value: fundersToAmount[msg.sender]}("");
+        uint256 balance = fundersToAmount[msg.sender];
+        (success, ) = payable(msg.sender).call{value: balance}("");
         require(success, "transfer tx failed");
         fundersToAmount[msg.sender] = 0;
+        emit RefundByFunder(msg.sender, balance);
     }
 
     function setFunderToAmount(address funder, uint256 amountToUpdate) external {
